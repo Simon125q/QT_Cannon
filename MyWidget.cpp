@@ -6,7 +6,9 @@
 #include <QWidget>
 #include <QVBoxLayout>
 #include <QSpinBox>
+#include <QGridLayout>
 #include "MyWidget.h"
+#include "LCDRange.h"
 
 MyWidget::MyWidget(QWidget *parent)
     : QWidget(parent)
@@ -18,27 +20,39 @@ MyWidget::MyWidget(QWidget *parent)
     quit->setGeometry(50, 50, 700, 250);
     quit->setFont(QFont("Times", 18, QFont::Bold));
 
-    QLCDNumber *lcd = new QLCDNumber(3);
-    lcd->setSegmentStyle(QLCDNumber::Filled);
+    // QLCDNumber *lcd = new QLCDNumber(3);
+    // lcd->setSegmentStyle(QLCDNumber::Filled);
 
     // QSlider *slider = new QSlider(Qt::Horizontal);
     // slider -> setRange(0, 999);
     // slider -> setValue(0);
 
-    QSpinBox *spinBox = new QSpinBox();
-    spinBox->setRange(0,999);
-    spinBox->setValue(0);
+    // QSpinBox *spinBox = new QSpinBox();
+    // spinBox->setRange(0,999);
+    // spinBox->setValue(0);
+
+    QGridLayout *grid = new QGridLayout();
+    for (int row = 0; row < 3; row++)
+    {
+        for (int col = 0; col < 3; col++)
+        {
+            LCDRange *lcdRange = new LCDRange();
+            grid->addWidget(lcdRange, row, col);
+        }
+    }
+
 
     // qApp pointer is a global variable declared in the
     //<QApplication> header file. It points to the application's
     // unique QApplication instance.
     connect(quit, SIGNAL(clicked()), qApp, SLOT(quit()));
-    connect(spinBox, SIGNAL(valueChanged(int)), lcd, SLOT(display(int)));
+    //connect(spinBox, SIGNAL(valueChanged(int)), lcd, SLOT(display(int)));
 
     // manage the geometry of its child widgets
     QVBoxLayout *layout = new QVBoxLayout;
     layout->addWidget(quit);
-    layout->addWidget(lcd);
-    layout->addWidget(spinBox);
+    //layout->addWidget(lcd);
+    //layout->addWidget(spinBox);
+    layout->addLayout(grid);
     setLayout(layout);
 }

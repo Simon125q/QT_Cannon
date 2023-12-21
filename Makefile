@@ -52,9 +52,11 @@ OBJECTS_DIR   = ./
 
 ####### Files
 
-SOURCES       = main.cpp \
+SOURCES       = LCDRange.cpp \
+		main.cpp \
 		MyWidget.cpp 
-OBJECTS       = main.o \
+OBJECTS       = LCDRange.o \
+		main.o \
 		MyWidget.o
 DIST          = /usr/lib/x86_64-linux-gnu/qt5/mkspecs/features/spec_pre.prf \
 		/usr/lib/x86_64-linux-gnu/qt5/mkspecs/common/unix.conf \
@@ -133,7 +135,9 @@ DIST          = /usr/lib/x86_64-linux-gnu/qt5/mkspecs/features/spec_pre.prf \
 		/usr/lib/x86_64-linux-gnu/qt5/mkspecs/features/exceptions.prf \
 		/usr/lib/x86_64-linux-gnu/qt5/mkspecs/features/yacc.prf \
 		/usr/lib/x86_64-linux-gnu/qt5/mkspecs/features/lex.prf \
-		QT_Cannon.pro MyWidget.h main.cpp \
+		QT_Cannon.pro LCDRange.h \
+		MyWidget.h LCDRange.cpp \
+		main.cpp \
 		MyWidget.cpp
 QMAKE_TARGET  = QT_Cannon
 DESTDIR       = 
@@ -318,8 +322,8 @@ distdir: FORCE
 	@test -d $(DISTDIR) || mkdir -p $(DISTDIR)
 	$(COPY_FILE) --parents $(DIST) $(DISTDIR)/
 	$(COPY_FILE) --parents /usr/lib/x86_64-linux-gnu/qt5/mkspecs/features/data/dummy.cpp $(DISTDIR)/
-	$(COPY_FILE) --parents MyWidget.h $(DISTDIR)/
-	$(COPY_FILE) --parents main.cpp MyWidget.cpp $(DISTDIR)/
+	$(COPY_FILE) --parents LCDRange.h MyWidget.h $(DISTDIR)/
+	$(COPY_FILE) --parents LCDRange.cpp main.cpp MyWidget.cpp $(DISTDIR)/
 
 
 clean: compiler_clean 
@@ -369,10 +373,14 @@ compiler_clean: compiler_moc_predefs_clean
 
 ####### Compile
 
+LCDRange.o: LCDRange.cpp LCDRange.h
+	$(CXX) -c $(CXXFLAGS) $(INCPATH) -o LCDRange.o LCDRange.cpp
+
 main.o: main.cpp MyWidget.h
 	$(CXX) -c $(CXXFLAGS) $(INCPATH) -o main.o main.cpp
 
-MyWidget.o: MyWidget.cpp MyWidget.h
+MyWidget.o: MyWidget.cpp MyWidget.h \
+		LCDRange.h
 	$(CXX) -c $(CXXFLAGS) $(INCPATH) -o MyWidget.o MyWidget.cpp
 
 ####### Install
