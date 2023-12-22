@@ -32,27 +32,31 @@ MyWidget::MyWidget(QWidget *parent)
     // spinBox->setValue(0);
 
     QGridLayout *grid = new QGridLayout();
-    for (int row = 0; row < 3; row++)
+    LCDRange *previousRange = 0;
+
+    for (int row = 0; row < 3; ++row)
     {
-        for (int col = 0; col < 3; col++)
+        for (int column = 0; column < 3; ++column)
         {
-            LCDRange *lcdRange = new LCDRange();
-            grid->addWidget(lcdRange, row, col);
+            LCDRange *lcdRange = new LCDRange;
+            grid->addWidget(lcdRange, row, column);
+            if (previousRange)
+                connect(lcdRange, SIGNAL(valueChanged(int)), previousRange, SLOT(setValue(int)));
+            previousRange = lcdRange;
         }
     }
-
 
     // qApp pointer is a global variable declared in the
     //<QApplication> header file. It points to the application's
     // unique QApplication instance.
     connect(quit, SIGNAL(clicked()), qApp, SLOT(quit()));
-    //connect(spinBox, SIGNAL(valueChanged(int)), lcd, SLOT(display(int)));
+    // connect(spinBox, SIGNAL(valueChanged(int)), lcd, SLOT(display(int)));
 
     // manage the geometry of its child widgets
     QVBoxLayout *layout = new QVBoxLayout;
     layout->addWidget(quit);
-    //layout->addWidget(lcd);
-    //layout->addWidget(spinBox);
+    // layout->addWidget(lcd);
+    // layout->addWidget(spinBox);
     layout->addLayout(grid);
     setLayout(layout);
 }
