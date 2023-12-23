@@ -22,6 +22,10 @@ LCDRange::LCDRange(QWidget *parent)
     layout->addWidget(lcd);
     layout->addWidget(slider);
     setLayout(layout);
+
+    // this mean that when someone (the program or the user) 
+    // wants to give the LCDRange keyboard focus, the slider should take care of it
+    setFocusProxy(slider);
 }
 
 int LCDRange::value() const
@@ -32,4 +36,14 @@ int LCDRange::value() const
 void LCDRange::setValue(int value)
 {
     slider->setValue(value);
+}
+
+void LCDRange::setRange(int min, int max)
+{
+    if(min < 0 || max > 99 || min > max)
+    {
+        qWarning("Wrong range");
+        return;
+    }
+    slider->setRange(min, max);
 }
