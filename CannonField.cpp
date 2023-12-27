@@ -63,6 +63,7 @@ void CannonField::shoot()
     shootAngle = currentAngle;
     shootForce = currentForce;
     autoShootTimer->start(5);
+    update(cannonRect());
 }
 
 void CannonField::moveShot()
@@ -73,7 +74,10 @@ void CannonField::moveShot()
     QRect shotR = shotRect();
 
     if (shotR.x() > width() || shotR.y() > height())
+    {
         autoShootTimer->stop();
+        update(cannonRect());
+    }
     else
         region = region.united(shotR);
     update(region);
@@ -97,7 +101,10 @@ void CannonField::paintCannon(QPainter &painter)
     // pen is responsible for drawing edges
     painter.setPen(Qt::NoPen);
     // brush is responsible for filling shapes
-    painter.setBrush(Qt::blue);
+    if (autoShootTimer->isActive())
+        painter.setBrush(Qt::green);
+    else
+        painter.setBrush(Qt::blue);
 
     painter.save();
     painter.translate(0, height());
@@ -112,7 +119,7 @@ void CannonField::paintShot(QPainter &painter)
 {
     painter.setPen(Qt::NoPen);
     painter.setBrush(Qt::black);
-    painter.drawRect(shotRect());
+    painter.drawEllipse(shotRect());
 }
 
 QRect CannonField::cannonRect() const

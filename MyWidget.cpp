@@ -28,10 +28,10 @@ MyWidget::MyWidget(QWidget *parent)
     // unique QApplication instance.
     connect(quit, SIGNAL(clicked()), qApp, SLOT(quit()));
 
-    LCDRange *angle = new LCDRange;
+    LCDRange *angle = new LCDRange("Angle");
     angle->setRange(5, 70);
 
-    LCDRange *force = new LCDRange;
+    LCDRange *force = new LCDRange("Force");
     force->setRange(0, 50);
 
     CannonField *cannonField = new CannonField;
