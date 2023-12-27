@@ -17,8 +17,11 @@ MyWidget::MyWidget(QWidget *parent)
 
     // create child widget
     QPushButton *quit = new QPushButton(tr("Quit"), this);
-    quit->setGeometry(50, 50, 700, 250);
+    //quit->setGeometry(50, 50, 700, 250);
     quit->setFont(QFont("Times", 18, QFont::Bold));
+
+    QPushButton *shoot = new QPushButton(tr("Shoot"));
+    shoot->setFont(QFont("Times", 18, QFont::Bold));
 
     // qApp pointer is a global variable declared in the
     //<QApplication> header file. It points to the application's
@@ -29,7 +32,7 @@ MyWidget::MyWidget(QWidget *parent)
     angle->setRange(5, 70);
 
     LCDRange *force = new LCDRange;
-    force->setRange(0, 100);
+    force->setRange(0, 50);
 
     CannonField *cannonField = new CannonField;
 
@@ -37,6 +40,11 @@ MyWidget::MyWidget(QWidget *parent)
     connect(cannonField, SIGNAL(angleChanged(int)), angle, SLOT(setValue(int)));
     connect(force, SIGNAL(valueChanged(int)), cannonField, SLOT(setForce(int)));
     connect(cannonField, SIGNAL(forceChanged(int)), force, SLOT(setValue(int)));
+    connect(shoot, SIGNAL(clicked()), cannonField, SLOT(shoot()));
+
+    QHBoxLayout *topLayout = new QHBoxLayout;
+    topLayout->addWidget(shoot);
+    topLayout->addStretch(1);
 
     QVBoxLayout *leftLayout = new QVBoxLayout;
     leftLayout->addWidget(angle);
@@ -44,11 +52,12 @@ MyWidget::MyWidget(QWidget *parent)
 
     QGridLayout *gridLayout = new QGridLayout;
     gridLayout->addWidget(quit, 0, 0);
+    gridLayout->addLayout(topLayout, 0, 1);
     gridLayout->addLayout(leftLayout, 1, 0);
     gridLayout->addWidget(cannonField, 1, 1, 2, 1);
 
     // tells how to handle resize of a column relative to other elements
-    gridLayout->setColumnStretch(1, 5);
+    gridLayout->setColumnStretch(1, 10);
     setLayout(gridLayout);
 
     angle->setValue(60);
