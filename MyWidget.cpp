@@ -23,6 +23,9 @@ MyWidget::MyWidget(QWidget *parent)
     QPushButton *shoot = new QPushButton(tr("Shoot"));
     shoot->setFont(QFont("Times", 18, QFont::Bold));
 
+    QPushButton *showTrajctory = new QPushButton(tr("Show Trajectory"));
+    showTrajctory->setFont(QFont("Times", 18, QFont::Bold));
+
     // qApp pointer is a global variable declared in the
     //<QApplication> header file. It points to the application's
     // unique QApplication instance.
@@ -41,9 +44,12 @@ MyWidget::MyWidget(QWidget *parent)
     connect(force, SIGNAL(valueChanged(int)), cannonField, SLOT(setForce(int)));
     connect(cannonField, SIGNAL(forceChanged(int)), force, SLOT(setValue(int)));
     connect(shoot, SIGNAL(clicked()), cannonField, SLOT(shoot()));
+    connect(cannonField, SIGNAL(targetHit()), cannonField, SLOT(newTarget()));
+    connect(showTrajctory, SIGNAL(clicked()), cannonField, SLOT(showBulletTrajctory()));
 
     QHBoxLayout *topLayout = new QHBoxLayout;
     topLayout->addWidget(shoot);
+    topLayout->addWidget(showTrajctory);
     topLayout->addStretch(1);
 
     QVBoxLayout *leftLayout = new QVBoxLayout;
