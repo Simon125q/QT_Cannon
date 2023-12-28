@@ -22,6 +22,7 @@ CannonField::CannonField(QWidget *parent)
     shootForce = 0;
     showTrajectory = false;
     gameEnded = false;
+    barrelPressed = false;
     setPalette(QPalette(QColor(250, 250, 200)));
     setAutoFillBackground(true);
     newTarget();
@@ -107,7 +108,8 @@ std::vector<QRect> CannonField::getTrajectory()
     std::vector<QRect> result;
     double x = 0, y = 0;
     double simulatedTime = 0;
-    while (!(x > width() && height() - 1 - y > height()))
+    bool wallHitted = false;
+    while (!(x > width() && height() - 1 - y > height()) && !wallHitted)
     {
         simulatedTime += 10;
         double gravity = 4;
@@ -122,6 +124,8 @@ std::vector<QRect> CannonField::getTrajectory()
         y = y0 + vely * time - 0.5 * gravity * time * time;
         QRect rect(0, 0, 6, 6);
         rect.moveCenter(QPoint(qRound(x), height() - 1 - qRound(y)));
+        if (rect.intersects(barrierRect()))
+            wallHitted = true;
         result.push_back(rect);
     }
 
@@ -165,7 +169,7 @@ void CannonField::moveShot()
         emit targetHit();
         emit canShoot(true);
     }
-    else if (shotR.x() > width() || shotR.y() > height())
+    else if (shotR.x() > width() || shotR.y() > height() || shotR.intersects(barrierRect()))
     {
         autoShootTimer->stop();
         update(cannonRect());
@@ -191,6 +195,7 @@ void CannonField::paintEvent(QPaintEvent * /* event */)
         painter.drawText(rect(), Qt::AlignCenter, "Game Over");
     }
     paintCannon(painter);
+    paintBarrier(painter);
     if (isShooting())
         paintShot(painter);
     if (!gameOver())
@@ -200,6 +205,33 @@ void CannonField::paintEvent(QPaintEvent * /* event */)
         paintTrajectory(painter, getTrajectory());
         update();
     }
+}
+
+void CannonField::mousePressEvent(QMouseEvent *event)
+{
+    if (event->button() != Qt::LeftButton)
+        return;
+    if (barrelHit(event->pos()))
+        barrelPressed = true;
+}
+
+void CannonField::mouseMoveEvent(QMouseEvent *event)
+{
+    if (!barrelPressed)
+        return;
+    QPoint pos = event->pos();
+    if (pos.x() <= 0)
+        pos.setX(1);
+    if(pos.y() >= height() -1)
+        pos.setY(height() - 1);
+    double rad = atan(((double)rect().bottom() - pos.y()) / pos.x());
+    setAngle(qRound(rad * 180 / 3.14159265));
+}
+
+void CannonField::mouseReleaseEvent(QMouseEvent *event)
+{
+    if (event->button() == Qt::LeftButton)
+        barrelPressed = false;
 }
 
 void CannonField::paintCannon(QPainter &painter)
@@ -245,6 +277,13 @@ void CannonField::paintTrajectory(QPainter &painter, std::vector<QRect> points)
     }
 }
 
+void CannonField::paintBarrier(QPainter &painter)
+{
+    painter.setPen(Qt::black);
+    painter.setBrush(Qt::yellow);
+    painter.drawRect(barrierRect());
+}
+
 QRect CannonField::cannonRect() const
 {
     QRect result(0, 0, 50, 50);
@@ -275,4 +314,18 @@ QRect CannonField::targetRect() const
     QRect result(0, 0, 20, 10);
     result.moveCenter(QPoint(target.x(), height() - 1 - target.y()));
     return result;
+}
+
+QRect CannonField::barrierRect() const
+{
+    return QRect(145, height() - 100, 15, 99);
+}
+
+bool CannonField::barrelHit(const QPoint &pos) const
+{
+    QMatrix matrix;
+    matrix.translate(0, height());
+    matrix.rotate(-currentAngle);
+    matrix = matrix.inverted();
+    return barrelRect.contains(matrix.map(pos));
 }

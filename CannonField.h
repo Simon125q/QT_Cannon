@@ -12,10 +12,14 @@ private:
     void paintCannon(QPainter &painter);
     void paintTarget(QPainter &painter);
     void paintTrajectory(QPainter &painter, std::vector<QRect> points);
+    void paintBarrier(QPainter &painter);
     QRect cannonRect() const;
     QRect shotRect() const;
     QRect targetRect() const;
+    QRect barrierRect() const;
     std::vector<QRect> getTrajectory();
+
+    bool barrelHit(const QPoint &pos) const;
 
     int currentAngle;
     int currentForce;
@@ -27,6 +31,7 @@ private:
     QPoint target;
     bool showTrajectory;
     bool gameEnded;
+    bool barrelPressed;
 
 public:
     CannonField(QWidget *parent = 0);
@@ -56,4 +61,7 @@ signals:
 
 protected:
     void paintEvent(QPaintEvent *event);
+    void mousePressEvent(QMouseEvent *event);
+    void mouseMoveEvent(QMouseEvent *event);
+    void mouseReleaseEvent(QMouseEvent *event);
 };

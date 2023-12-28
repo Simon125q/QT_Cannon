@@ -6,7 +6,9 @@
 #include <QWidget>
 #include <QVBoxLayout>
 #include <QSpinBox>
+#include <QFrame>
 #include <QLabel>
+#include <QShortcut>
 #include <QGridLayout>
 #include "GameBoard.h"
 #include "LCDRange.h"
@@ -41,6 +43,9 @@ GameBoard::GameBoard(QWidget *parent)
     LCDRange *force = new LCDRange("Force");
     force->setRange(0, 99);
 
+    QFrame *cannonBox = new QFrame;
+    cannonBox->setFrameStyle(QFrame::WinPanel | QFrame::Sunken);
+
     cannonField = new CannonField;
 
     connect(angle, SIGNAL(valueChanged(int)), cannonField, SLOT(setAngle(int)));
@@ -63,6 +68,10 @@ GameBoard::GameBoard(QWidget *parent)
     shotsLeft->setSegmentStyle(QLCDNumber::Filled);
     QLabel *shotsLeftLabel = new QLabel("SHOTS LEFT");
 
+    (void) new QShortcut(Qt::Key_Enter, this, SLOT(fire()));
+    (void) new QShortcut(Qt::Key_Return, this, SLOT(fire()));
+    (void) new QShortcut(Qt::CTRL + Qt::Key_Q, this, SLOT(close()));
+
     QHBoxLayout *topLayout = new QHBoxLayout;
     topLayout->addWidget(shoot);
     topLayout->addWidget(showTrajctory);
@@ -77,11 +86,15 @@ GameBoard::GameBoard(QWidget *parent)
     leftLayout->addWidget(angle);
     leftLayout->addWidget(force);
 
+    QVBoxLayout *cannonLayout = new QVBoxLayout;
+    cannonLayout->addWidget(cannonField);
+    cannonBox->setLayout(cannonLayout);
+
     QGridLayout *gridLayout = new QGridLayout;
     gridLayout->addWidget(quit, 0, 0);
     gridLayout->addLayout(topLayout, 0, 1);
     gridLayout->addLayout(leftLayout, 1, 0);
-    gridLayout->addWidget(cannonField, 1, 1, 2, 1);
+    gridLayout->addWidget(cannonBox, 1, 1, 2, 1);
 
     // tells how to handle resize of a column relative to other elements
     gridLayout->setColumnStretch(1, 10);
