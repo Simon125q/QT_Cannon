@@ -4,7 +4,6 @@
 #include <stdlib.h>
 #include <vector>
 
-
 class CannonField : public QWidget
 {
     Q_OBJECT
@@ -26,12 +25,15 @@ private:
     float shootAngle;
     float shootForce;
     QPoint target;
-    bool showTrajectory = false;
+    bool showTrajectory;
+    bool gameEnded;
 
 public:
     CannonField(QWidget *parent = 0);
     int angle() const;
     int force() const;
+    bool gameOver() const;
+    bool isShooting() const;
 
 public slots:
     void setAngle(int angle);
@@ -39,6 +41,8 @@ public slots:
     void shoot();
     void newTarget();
     void showBulletTrajctory();
+    void setGameOver();
+    void restartGame();
 
 private slots:
     void moveShot();
@@ -48,6 +52,7 @@ signals:
     void forceChanged(int newForce);
     void targetHit();
     void targetMissed();
+    void canShoot(bool can);
 
 protected:
     void paintEvent(QPaintEvent *event);

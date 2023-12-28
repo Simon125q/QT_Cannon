@@ -14,6 +14,7 @@ private:
     QSlider *slider;
     QLabel *label;
     void init();
+
 public:
     LCDRange(QWidget *parent = 0);
     LCDRange(const QString &text, QWidget *parent = 0);
@@ -28,4 +29,3 @@ public slots:
 signals:
     void valueChanged(int newValue);
 };
-

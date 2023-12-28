@@ -53,15 +53,17 @@ OBJECTS_DIR   = ./
 ####### Files
 
 SOURCES       = CannonField.cpp \
+		GameBoard.cpp \
 		LCDRange.cpp \
-		main.cpp \
-		MyWidget.cpp moc_CannonField.cpp \
+		main.cpp moc_CannonField.cpp \
+		moc_GameBoard.cpp \
 		moc_LCDRange.cpp
 OBJECTS       = CannonField.o \
+		GameBoard.o \
 		LCDRange.o \
 		main.o \
-		MyWidget.o \
 		moc_CannonField.o \
+		moc_GameBoard.o \
 		moc_LCDRange.o
 DIST          = /usr/lib/x86_64-linux-gnu/qt5/mkspecs/features/spec_pre.prf \
 		/usr/lib/x86_64-linux-gnu/qt5/mkspecs/common/unix.conf \
@@ -141,11 +143,11 @@ DIST          = /usr/lib/x86_64-linux-gnu/qt5/mkspecs/features/spec_pre.prf \
 		/usr/lib/x86_64-linux-gnu/qt5/mkspecs/features/yacc.prf \
 		/usr/lib/x86_64-linux-gnu/qt5/mkspecs/features/lex.prf \
 		QT_Cannon.pro CannonField.h \
-		LCDRange.h \
-		MyWidget.h CannonField.cpp \
+		GameBoard.h \
+		LCDRange.h CannonField.cpp \
+		GameBoard.cpp \
 		LCDRange.cpp \
-		main.cpp \
-		MyWidget.cpp
+		main.cpp
 QMAKE_TARGET  = QT_Cannon
 DESTDIR       = 
 TARGET        = QT_Cannon
@@ -329,8 +331,8 @@ distdir: FORCE
 	@test -d $(DISTDIR) || mkdir -p $(DISTDIR)
 	$(COPY_FILE) --parents $(DIST) $(DISTDIR)/
 	$(COPY_FILE) --parents /usr/lib/x86_64-linux-gnu/qt5/mkspecs/features/data/dummy.cpp $(DISTDIR)/
-	$(COPY_FILE) --parents CannonField.h LCDRange.h MyWidget.h $(DISTDIR)/
-	$(COPY_FILE) --parents CannonField.cpp LCDRange.cpp main.cpp MyWidget.cpp $(DISTDIR)/
+	$(COPY_FILE) --parents CannonField.h GameBoard.h LCDRange.h $(DISTDIR)/
+	$(COPY_FILE) --parents CannonField.cpp GameBoard.cpp LCDRange.cpp main.cpp $(DISTDIR)/
 
 
 clean: compiler_clean 
@@ -362,13 +364,18 @@ compiler_moc_predefs_clean:
 moc_predefs.h: /usr/lib/x86_64-linux-gnu/qt5/mkspecs/features/data/dummy.cpp
 	g++ -pipe -O2 -Wall -Wextra -dM -E -o moc_predefs.h /usr/lib/x86_64-linux-gnu/qt5/mkspecs/features/data/dummy.cpp
 
-compiler_moc_header_make_all: moc_CannonField.cpp moc_LCDRange.cpp
+compiler_moc_header_make_all: moc_CannonField.cpp moc_GameBoard.cpp moc_LCDRange.cpp
 compiler_moc_header_clean:
-	-$(DEL_FILE) moc_CannonField.cpp moc_LCDRange.cpp
+	-$(DEL_FILE) moc_CannonField.cpp moc_GameBoard.cpp moc_LCDRange.cpp
 moc_CannonField.cpp: CannonField.h \
 		moc_predefs.h \
 		/usr/lib/qt5/bin/moc
 	/usr/lib/qt5/bin/moc $(DEFINES) --include /home/simon/Documents/GitHub/QT_Cannon/moc_predefs.h -I/usr/lib/x86_64-linux-gnu/qt5/mkspecs/linux-g++ -I/home/simon/Documents/GitHub/QT_Cannon -I/home/simon/Documents/GitHub/QT_Cannon -I/usr/include/x86_64-linux-gnu/qt5 -I/usr/include/x86_64-linux-gnu/qt5/QtWidgets -I/usr/include/x86_64-linux-gnu/qt5/QtGui -I/usr/include/x86_64-linux-gnu/qt5/QtCore -I/usr/include/c++/11 -I/usr/include/x86_64-linux-gnu/c++/11 -I/usr/include/c++/11/backward -I/usr/lib/gcc/x86_64-linux-gnu/11/include -I/usr/local/include -I/usr/include/x86_64-linux-gnu -I/usr/include CannonField.h -o moc_CannonField.cpp
+
+moc_GameBoard.cpp: GameBoard.h \
+		moc_predefs.h \
+		/usr/lib/qt5/bin/moc
+	/usr/lib/qt5/bin/moc $(DEFINES) --include /home/simon/Documents/GitHub/QT_Cannon/moc_predefs.h -I/usr/lib/x86_64-linux-gnu/qt5/mkspecs/linux-g++ -I/home/simon/Documents/GitHub/QT_Cannon -I/home/simon/Documents/GitHub/QT_Cannon -I/usr/include/x86_64-linux-gnu/qt5 -I/usr/include/x86_64-linux-gnu/qt5/QtWidgets -I/usr/include/x86_64-linux-gnu/qt5/QtGui -I/usr/include/x86_64-linux-gnu/qt5/QtCore -I/usr/include/c++/11 -I/usr/include/x86_64-linux-gnu/c++/11 -I/usr/include/c++/11/backward -I/usr/lib/gcc/x86_64-linux-gnu/11/include -I/usr/local/include -I/usr/include/x86_64-linux-gnu -I/usr/include GameBoard.h -o moc_GameBoard.cpp
 
 moc_LCDRange.cpp: LCDRange.h \
 		moc_predefs.h \
@@ -394,19 +401,22 @@ compiler_clean: compiler_moc_predefs_clean compiler_moc_header_clean
 CannonField.o: CannonField.cpp CannonField.h
 	$(CXX) -c $(CXXFLAGS) $(INCPATH) -o CannonField.o CannonField.cpp
 
+GameBoard.o: GameBoard.cpp GameBoard.h \
+		LCDRange.h \
+		CannonField.h
+	$(CXX) -c $(CXXFLAGS) $(INCPATH) -o GameBoard.o GameBoard.cpp
+
 LCDRange.o: LCDRange.cpp LCDRange.h
 	$(CXX) -c $(CXXFLAGS) $(INCPATH) -o LCDRange.o LCDRange.cpp
 
-main.o: main.cpp MyWidget.h
+main.o: main.cpp GameBoard.h
 	$(CXX) -c $(CXXFLAGS) $(INCPATH) -o main.o main.cpp
-
-MyWidget.o: MyWidget.cpp MyWidget.h \
-		LCDRange.h \
-		CannonField.h
-	$(CXX) -c $(CXXFLAGS) $(INCPATH) -o MyWidget.o MyWidget.cpp
 
 moc_CannonField.o: moc_CannonField.cpp 
 	$(CXX) -c $(CXXFLAGS) $(INCPATH) -o moc_CannonField.o moc_CannonField.cpp
+
+moc_GameBoard.o: moc_GameBoard.cpp 
+	$(CXX) -c $(CXXFLAGS) $(INCPATH) -o moc_GameBoard.o moc_GameBoard.cpp
 
 moc_LCDRange.o: moc_LCDRange.cpp 
 	$(CXX) -c $(CXXFLAGS) $(INCPATH) -o moc_LCDRange.o moc_LCDRange.cpp

@@ -20,6 +20,8 @@ CannonField::CannonField(QWidget *parent)
     connect(autoShootTimer, SIGNAL(timeout()), this, SLOT(moveShot()));
     shootAngle = 0;
     shootForce = 0;
+    showTrajectory = false;
+    gameEnded = false;
     setPalette(QPalette(QColor(250, 250, 200)));
     setAutoFillBackground(true);
     newTarget();
@@ -29,6 +31,23 @@ int CannonField::angle() const
 {
     return currentAngle;
 }
+
+int CannonField::force() const
+{
+    return currentForce;
+}
+
+bool CannonField::gameOver() const
+{
+    return gameEnded;
+}
+
+bool CannonField::isShooting() const
+{
+    return autoShootTimer->isActive();
+}
+
+// SLOTS
 
 void CannonField::setAngle(int angle)
 {
@@ -44,11 +63,6 @@ void CannonField::setAngle(int angle)
     emit angleChanged(currentAngle);
 }
 
-int CannonField::force() const
-{
-    return currentForce;
-}
-
 void CannonField::setForce(int force)
 {
     if (force < 0)
@@ -62,7 +76,7 @@ void CannonField::setForce(int force)
 
 void CannonField::shoot()
 {
-    if (autoShootTimer->isActive())
+    if (isShooting())
         return;
     timerCount = 0;
     shootAngle = currentAngle;
@@ -70,6 +84,7 @@ void CannonField::shoot()
     autoShootTimer->start(3);
     showTrajectory = false;
     update(cannonRect());
+    emit canShoot(false);
 }
 
 void CannonField::newTarget()
@@ -110,14 +125,32 @@ std::vector<QRect> CannonField::getTrajectory()
         result.push_back(rect);
     }
 
-    
-    return result;
+        return result;
 }
 
 void CannonField::showBulletTrajctory()
 {
     showTrajectory = !showTrajectory;
     update();
+}
+
+void CannonField::setGameOver()
+{
+    if (gameEnded)
+        return;
+    if (isShooting())
+        autoShootTimer->stop();
+    gameEnded = true;
+    update();
+}
+
+void CannonField::restartGame()
+{
+    if (isShooting())
+        autoShootTimer->stop();
+    gameEnded = false;
+    update();
+    emit canShoot(true);
 }
 
 void CannonField::moveShot()
@@ -130,27 +163,38 @@ void CannonField::moveShot()
     {
         autoShootTimer->stop();
         emit targetHit();
+        emit canShoot(true);
     }
     else if (shotR.x() > width() || shotR.y() > height())
     {
         autoShootTimer->stop();
         update(cannonRect());
         emit targetMissed();
+        emit canShoot(true);
     }
     else
         region = region.united(shotR);
     update(region);
 }
 
+// Methods
+
 void CannonField::paintEvent(QPaintEvent * /* event */)
 {
 
     QPainter painter(this);
 
+    if (gameEnded)
+    {
+        painter.setPen(Qt::black);
+        painter.setFont(QFont("Courier", 48, QFont::Bold));
+        painter.drawText(rect(), Qt::AlignCenter, "Game Over");
+    }
     paintCannon(painter);
-    if (autoShootTimer->isActive())
+    if (isShooting())
         paintShot(painter);
-    paintTarget(painter);
+    if (!gameOver())
+        paintTarget(painter);
     if (showTrajectory)
     {
         paintTrajectory(painter, getTrajectory());

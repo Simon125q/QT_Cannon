@@ -6,25 +6,29 @@
 #include <QWidget>
 #include <QVBoxLayout>
 #include <QSpinBox>
+#include <QLabel>
 #include <QGridLayout>
-#include "MyWidget.h"
+#include "GameBoard.h"
 #include "LCDRange.h"
 #include "CannonField.h"
 
-MyWidget::MyWidget(QWidget *parent)
+GameBoard::GameBoard(QWidget *parent)
     : QWidget(parent)
 {
 
     // create child widget
     QPushButton *quit = new QPushButton(tr("Quit"), this);
-    //quit->setGeometry(50, 50, 700, 250);
+    // quit->setGeometry(50, 50, 700, 250);
     quit->setFont(QFont("Times", 18, QFont::Bold));
 
     QPushButton *shoot = new QPushButton(tr("Shoot"));
     shoot->setFont(QFont("Times", 18, QFont::Bold));
 
-    QPushButton *showTrajctory = new QPushButton(tr("Show Trajectory"));
+    QPushButton *showTrajctory = new QPushButton(tr("Trajectory"));
     showTrajctory->setFont(QFont("Times", 18, QFont::Bold));
+
+    QPushButton *restart = new QPushButton(tr("NEW GAME"));
+    restart->setFont(QFont("Times", 18, QFont::Bold));
 
     // qApp pointer is a global variable declared in the
     //<QApplication> header file. It points to the application's
@@ -35,22 +39,39 @@ MyWidget::MyWidget(QWidget *parent)
     angle->setRange(5, 70);
 
     LCDRange *force = new LCDRange("Force");
-    force->setRange(0, 50);
+    force->setRange(0, 99);
 
-    CannonField *cannonField = new CannonField;
+    cannonField = new CannonField;
 
     connect(angle, SIGNAL(valueChanged(int)), cannonField, SLOT(setAngle(int)));
     connect(cannonField, SIGNAL(angleChanged(int)), angle, SLOT(setValue(int)));
     connect(force, SIGNAL(valueChanged(int)), cannonField, SLOT(setForce(int)));
     connect(cannonField, SIGNAL(forceChanged(int)), force, SLOT(setValue(int)));
-    connect(shoot, SIGNAL(clicked()), cannonField, SLOT(shoot()));
+    connect(shoot, SIGNAL(clicked()), this, SLOT(fire()));
+    connect(cannonField, SIGNAL(canShoot(bool)), shoot, SLOT(setEnabled(bool)));
     connect(cannonField, SIGNAL(targetHit()), cannonField, SLOT(newTarget()));
     connect(showTrajctory, SIGNAL(clicked()), cannonField, SLOT(showBulletTrajctory()));
+    connect(cannonField, SIGNAL(targetHit()), this, SLOT(hit()));
+    connect(cannonField, SIGNAL(targetMissed()), this, SLOT(missed()));
+    connect(restart, SIGNAL(clicked()), this, SLOT(newGame()));
+
+    hits = new QLCDNumber(2);
+    hits->setSegmentStyle(QLCDNumber::Filled);
+    QLabel *hitsLabel = new QLabel("HITS");
+
+    shotsLeft = new QLCDNumber(2);
+    shotsLeft->setSegmentStyle(QLCDNumber::Filled);
+    QLabel *shotsLeftLabel = new QLabel("SHOTS LEFT");
 
     QHBoxLayout *topLayout = new QHBoxLayout;
     topLayout->addWidget(shoot);
     topLayout->addWidget(showTrajctory);
+    topLayout->addWidget(hits);
+    topLayout->addWidget(hitsLabel);
+    topLayout->addWidget(shotsLeft);
+    topLayout->addWidget(shotsLeftLabel);
     topLayout->addStretch(1);
+    topLayout->addWidget(restart);
 
     QVBoxLayout *leftLayout = new QVBoxLayout;
     leftLayout->addWidget(angle);
@@ -71,6 +92,8 @@ MyWidget::MyWidget(QWidget *parent)
 
     // sets keyboard's focus on angle so that keyboard input will go to the LCDRange widget by default.
     angle->setFocus();
+
+    newGame();
 
     // setFixedSize(700, 340);
 
@@ -100,7 +123,6 @@ MyWidget::MyWidget(QWidget *parent)
     //     }
     // }
 
-    
     // connect(spinBox, SIGNAL(valueChanged(int)), lcd, SLOT(display(int)));
 
     // manage the geometry of its child widgets
@@ -110,4 +132,35 @@ MyWidget::MyWidget(QWidget *parent)
     // // layout->addWidget(spinBox);
     // layout->addLayout(grid);
     // setLayout(layout);
+}
+
+void GameBoard::fire()
+{
+    if (cannonField->gameOver() || cannonField->isShooting())
+        return;
+    shotsLeft->display(shotsLeft->intValue() - 1);
+    cannonField->shoot();
+}
+
+void GameBoard::hit()
+{
+    hits->display(hits->intValue() + 1);
+    if (shotsLeft->intValue() == 0)
+        cannonField->setGameOver();
+    else
+        cannonField->newTarget();
+}
+
+void GameBoard::missed()
+{
+    if (shotsLeft->intValue() == 0)
+        cannonField->setGameOver();
+}
+
+void GameBoard::newGame()
+{
+    shotsLeft->display(15);
+    hits->display(0);
+    cannonField->restartGame();
+    cannonField->newTarget();
 }

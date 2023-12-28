@@ -6,7 +6,7 @@
 #include "LCDRange.h"
 
 LCDRange::LCDRange(QWidget *parent)
-    :QWidget(parent)
+    : QWidget(parent)
 {
     init();
 }
@@ -29,6 +29,7 @@ void LCDRange::init()
     label = new QLabel;
     // horizontall centered, verticaly to top
     label->setAlignment(Qt::AlignHCenter | Qt::AlignTop);
+    label->setSizePolicy(QSizePolicy::Preferred, QSizePolicy::Fixed);
 
     connect(slider, SIGNAL(valueChanged(int)), lcd, SLOT(display(int)));
     connect(slider, SIGNAL(valueChanged(int)), this, SIGNAL(valueChanged(int)));
@@ -39,7 +40,7 @@ void LCDRange::init()
     layout->addWidget(label);
     setLayout(layout);
 
-    // this mean that when someone (the program or the user) 
+    // this mean that when someone (the program or the user)
     // wants to give the LCDRange keyboard focus, the slider should take care of it
     setFocusProxy(slider);
 }
@@ -56,7 +57,7 @@ void LCDRange::setValue(int value)
 
 void LCDRange::setRange(int min, int max)
 {
-    if(min < 0 || max > 99 || min > max)
+    if (min < 0 || max > 99 || min > max)
     {
         qWarning("Wrong range");
         return;
